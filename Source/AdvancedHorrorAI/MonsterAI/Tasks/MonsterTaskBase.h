@@ -10,7 +10,7 @@ class AMonster;
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class ADVANCEDHORRORAI_API UMonsterTaskBase : public UBTTaskNode
 {
 	GENERATED_BODY()

@@ -15,8 +15,8 @@ class ADVANCEDHORRORAI_API UMonsterTaskBase : public UBTTaskNode
 {
 	GENERATED_BODY()
 public:
-	// Will be NULL if Super::ExecuteTask is not ran.
-	AMonster* monsterRef;
+	AMonster* monsterRef; // Will be NULL if Super::ExecuteTask is not ran.
+	AAIController* AIController; // Will be NULL if Super::ExecuteTask is not ran.
 	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 };

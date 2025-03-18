@@ -8,6 +8,7 @@
 EBTNodeResult::Type UMonsterTaskBase::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	monsterRef = Cast<AMonster>(OwnerComp.GetAIOwner()->GetPawn());
+	AIController = OwnerComp.GetAIOwner();
 	
 	return EBTNodeResult::Succeeded;
 }

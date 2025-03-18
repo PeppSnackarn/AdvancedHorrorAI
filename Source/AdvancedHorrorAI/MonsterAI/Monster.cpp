@@ -3,6 +3,7 @@
 
 #include "Monster.h"
 #include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 // Sets default values
 AMonster::AMonster()
@@ -13,7 +14,7 @@ void AMonster::BeginPlay()
 {
 	Super::BeginPlay();
 	BlackboardComponent = Cast<AAIController>(GetController())->GetBlackboardComponent();
-	
+	BlackboardComponent->SetValueAsEnum("CurrentState", static_cast<uint8>(CurrentState));
 }
 void AMonster::Tick(float DeltaTime)
 {
@@ -27,6 +28,7 @@ void AMonster::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AMonster::SetState(EState newState)
 {
 	CurrentState = newState;
+	BlackboardComponent->SetValueAsEnum("CurrentState", static_cast<uint8>(CurrentState));
 	switch (newState)
 	{
 	case EState::Idle:

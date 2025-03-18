@@ -6,24 +6,39 @@
 #include "GameFramework/Character.h"
 #include "Monster.generated.h"
 
+class UBlackboardComponent;
+
+UENUM()
+enum class EState : uint8
+{
+	Idle,
+	Patrol,
+	Investigate,
+	Hunt,
+	Leave
+};
 UCLASS()
 class ADVANCEDHORRORAI_API AMonster : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AMonster();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	protected:
+	UBlackboardComponent* BlackboardComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Monster")
+	EState CurrentState = EState::Idle;
+
+	public:
+	void SetState(EState newState);
+	inline EState GetCurrentState() { return CurrentState; }
 };

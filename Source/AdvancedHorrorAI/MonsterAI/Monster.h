@@ -37,8 +37,11 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Monster")
 	EState CurrentState = EState::Idle;
+	UPROPERTY(VisibleAnywhere, meta =(ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"), Category = "Monster")
+	float Aggression = 0;
 
 	public:
 	void SetState(EState newState);
 	inline EState GetCurrentState() { return CurrentState; }
+	inline void AddAggression(float ValueToAdd) { Aggression += ValueToAdd; Aggression = FMath::Clamp(Aggression, 0, 100); }
 };

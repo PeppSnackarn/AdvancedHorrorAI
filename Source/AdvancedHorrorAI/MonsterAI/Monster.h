@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Monster.generated.h"
 
+class UAIPerceptionComponent;
 class UBlackboardComponent;
 
 UENUM()
@@ -31,6 +32,8 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION()
+	void HandleSenses(AActor* Actor,FAIStimulus Stimulus);
 
 	protected:
 	UBlackboardComponent* BlackboardComponent;
@@ -39,6 +42,8 @@ public:
 	EState CurrentState = EState::Idle;
 	UPROPERTY(VisibleAnywhere, meta =(ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"), Category = "Monster")
 	float Aggression = 0;
+	UPROPERTY(EditAnywhere, Category = "Monster")
+	UAIPerceptionComponent* PerceptionComponent = nullptr;
 
 	public:
 	void SetState(EState newState);

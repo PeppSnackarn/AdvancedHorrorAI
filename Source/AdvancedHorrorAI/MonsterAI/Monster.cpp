@@ -37,6 +37,10 @@ void AMonster::Tick(float DeltaTime)
 	{
 		SetState(EState::Hunt);
 	}
+	if(CurrentState == EState::Hunt)
+	{
+		// Add specific Hunt logic here???
+	}
 	
 }
 void AMonster::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -48,9 +52,10 @@ void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus)
 	if (AAdvancedHorrorAICharacter* Player = Cast<AAdvancedHorrorAICharacter>(Actor))
 	{
 		bCanSeePlayer = !bCanSeePlayer;
-		// UE_LOG(LogTemp, Log, TEXT("Player spotted")) // does spot player but works as a toggle.
+		BlackboardComponent->SetValueAsVector("LastPlayerLocation", Player->GetActorLocation());
 	}
 }
+
 void AMonster::SetState(EState newState)
 {
 	CurrentState = newState;

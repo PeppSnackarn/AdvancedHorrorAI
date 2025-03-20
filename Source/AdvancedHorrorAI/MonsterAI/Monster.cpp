@@ -12,7 +12,7 @@ AMonster::AMonster()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
-	PerceptionComponent->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &AMonster::HandleSenses);
+	PerceptionComponent->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &AMonster::HandleSenses); // might not be the correct "tick" function
 }
 void AMonster::BeginPlay()
 {
@@ -33,8 +33,7 @@ void AMonster::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus)
 {
-	AAdvancedHorrorAICharacter* Player = Cast<AAdvancedHorrorAICharacter>(Actor);
-	if (Player)
+	if (AAdvancedHorrorAICharacter* Player = Cast<AAdvancedHorrorAICharacter>(Actor))
 	{
 		UE_LOG(LogTemp, Log, TEXT("Player spotted")) // does spot player but only when monster moves.
 	}

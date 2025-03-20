@@ -25,24 +25,38 @@ void AMonster::BeginPlay()
 void AMonster::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if(bCanSeePlayer)
+	{
+		AddAggression(AggressionAddedPerSecond * DeltaTime);
+	}
+	if(Aggression >= 60 && Aggression < 90) // make into variable later
+	{
+		SetState(EState::Investigate);
+	}
+	else if(Aggression >= 90) // make into variable later
+	{
+		SetState(EState::Hunt);
+	}
+	
 }
 void AMonster::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
-
 void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus)
 {
 	if (AAdvancedHorrorAICharacter* Player = Cast<AAdvancedHorrorAICharacter>(Actor))
 	{
-		UE_LOG(LogTemp, Log, TEXT("Player spotted")) // does spot player but only when monster moves.
+		bCanSeePlayer = !bCanSeePlayer;
+		// UE_LOG(LogTemp, Log, TEXT("Player spotted")) // does spot player but works as a toggle.
 	}
 }
-
 void AMonster::SetState(EState newState)
 {
 	CurrentState = newState;
 	BlackboardComponent->SetValueAsEnum("CurrentState", static_cast<uint8>(CurrentState));
+	float InvestigateStartTime = 0;
+	float HuntStartTime = 0;
 	switch (newState)
 	{
 	case EState::Idle:
@@ -50,8 +64,10 @@ void AMonster::SetState(EState newState)
 	case EState::Patrol:
 		break;
 	case EState::Investigate:
+		InvestigateStartTime = GetWorld()->GetTimeSeconds(); // fire logic here
 		break;
 	case EState::Hunt:
+		HuntStartTime = GetWorld()->GetTimeSeconds(); // fire logic here
 		break;
 	case EState::Leave:
 		break;

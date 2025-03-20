@@ -43,7 +43,11 @@ public:
 	UPROPERTY(VisibleAnywhere, meta =(ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"), Category = "Monster")
 	float Aggression = 0;
 	UPROPERTY(EditAnywhere, Category = "Monster")
+	float AggressionAddedPerSecond = 90;
+	UPROPERTY(EditAnywhere, Category = "Monster")
 	UAIPerceptionComponent* PerceptionComponent = nullptr;
+	UPROPERTY(VisibleAnywhere ,Category = "Monster")
+	bool bCanSeePlayer = false;
 
 	public:
 	void SetState(EState newState);

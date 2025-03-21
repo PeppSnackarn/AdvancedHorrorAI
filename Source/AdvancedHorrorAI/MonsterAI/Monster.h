@@ -31,23 +31,27 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+	void HandleAggressionStates();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	UFUNCTION()
 	void HandleSenses(AActor* Actor,FAIStimulus Stimulus);
-
+	void DecayAgression();
+	
 	protected:
 	UBlackboardComponent* BlackboardComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Monster")
+	UPROPERTY(VisibleAnywhere, Category = "Monster Info")
 	EState CurrentState = EState::Idle;
-	UPROPERTY(VisibleAnywhere, meta =(ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"), Category = "Monster")
+	UPROPERTY(VisibleAnywhere, meta =(ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"), Category = "Monster Info")
 	float Aggression = 0;
-	UPROPERTY(EditAnywhere, Category = "Monster")
+	UPROPERTY(EditAnywhere, Category = "Monster Config")
 	float AggressionAddedPerSecond = 90;
-	UPROPERTY(EditAnywhere, Category = "Monster")
+	UPROPERTY(EditDefaultsOnly, Category = "Monster Info")
 	UAIPerceptionComponent* PerceptionComponent = nullptr;
-	UPROPERTY(VisibleAnywhere ,Category = "Monster")
+	UPROPERTY(VisibleAnywhere ,Category = "Monster Info")
 	bool bCanSeePlayer = false;
+
+	float TimeAtLastSeenPlayer;
 
 	public:
 	void SetState(EState newState);

@@ -29,11 +29,21 @@ void AMonster::Tick(float DeltaTime)
 	{
 		AddAggression(AggressionAddedPerSecond * DeltaTime);
 	}
-	if(Aggression >= 60 && Aggression < 90) // make into variable later
+	HandleAggressionStates();
+	DecayAgression();
+}
+
+void AMonster::HandleAggressionStates()
+{
+	if(Aggression < 60)
+	{
+		SetState(EState::Idle);
+	}
+	else if(Aggression >= 60 && Aggression < 90) 
 	{
 		SetState(EState::Investigate);
 	}
-	else if(Aggression >= 90) // make into variable later
+	else if(Aggression >= 90) 
 	{
 		SetState(EState::Hunt);
 	}
@@ -41,8 +51,8 @@ void AMonster::Tick(float DeltaTime)
 	{
 		// Add specific Hunt logic here???
 	}
-	
 }
+
 void AMonster::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -52,7 +62,19 @@ void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus)
 	if (AAdvancedHorrorAICharacter* Player = Cast<AAdvancedHorrorAICharacter>(Actor))
 	{
 		bCanSeePlayer = !bCanSeePlayer;
+		if(!bCanSeePlayer)
+		{
+			TimeAtLastSeenPlayer = GetWorld()->GetTime().GetRealTimeSeconds() + 5;
+		}
 		BlackboardComponent->SetValueAsVector("LastPlayerLocation", Player->GetActorLocation());
+	}
+}
+
+void AMonster::DecayAgression()
+{
+	if(TimeAtLastSeenPlayer <= GetWorld()->GetTime().GetRealTimeSeconds())
+	{
+		AddAggression(-100);
 	}
 }
 

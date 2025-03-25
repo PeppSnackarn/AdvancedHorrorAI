@@ -35,7 +35,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	UFUNCTION()
 	void HandleSenses(AActor* Actor,FAIStimulus Stimulus);
-	void DecayAgression();
+	bool ShouldDecayAggression();
 	
 	protected:
 	UBlackboardComponent* BlackboardComponent;
@@ -44,12 +44,17 @@ public:
 	EState CurrentState = EState::Idle;
 	UPROPERTY(VisibleAnywhere, meta =(ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"), Category = "Monster Info")
 	float Aggression = 0;
-	UPROPERTY(EditAnywhere, Category = "Monster Config")
-	float AggressionAddedPerSecond = 90;
 	UPROPERTY(EditDefaultsOnly, Category = "Monster Info")
 	UAIPerceptionComponent* PerceptionComponent = nullptr;
 	UPROPERTY(VisibleAnywhere ,Category = "Monster Info")
 	bool bCanSeePlayer = false;
+	
+	UPROPERTY(EditAnywhere, Category = "Monster Config")
+	float AggressionAddedPerSecond = 90;
+	UPROPERTY(EditAnywhere, Category = "Monster Config")
+	float AggressionDecayPerSecond = 40;
+	UPROPERTY(EditAnywhere, Category = "Monster Config")
+	float AggressionDecayCooldown = 5;
 
 	float TimeAtLastSeenPlayer;
 

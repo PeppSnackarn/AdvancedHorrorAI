@@ -5,14 +5,16 @@
 #include "AIController.h"
 #include "AdvancedHorrorAI/AdvancedHorrorAICharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
 
 // Sets default values
 AMonster::AMonster()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
-	PerceptionComponent->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &AMonster::HandleSenses); // might not be the correct "tick" function
+	PerceptionComponent->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &AMonster::HandleSenses); //Upon an actor having been sensed or stopped being sensed.
 }
 void AMonster::BeginPlay()
 {
@@ -28,9 +30,17 @@ void AMonster::Tick(float DeltaTime)
 	if(bCanSeePlayer)
 	{
 		AddAggression(AggressionAddedPerSecond * DeltaTime);
+		BlackboardComponent->SetValueAsVector("LastPlayerLocation", GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation()); // Ugly solution to always have last player location available
+		TimeAtLastSeenPlayer = GetWorld()->GetTime().GetRealTimeSeconds() + AggressionDecayCooldown;
+	}
+	else
+	{
+		if(ShouldDecayAggression())
+		{
+			AddAggression(-AggressionDecayPerSecond * DeltaTime);
+		}
 	}
 	HandleAggressionStates();
-	DecayAgression();
 }
 
 void AMonster::HandleAggressionStates()
@@ -39,17 +49,13 @@ void AMonster::HandleAggressionStates()
 	{
 		SetState(EState::Idle);
 	}
-	else if(Aggression >= 60 && Aggression < 90) 
+	else if(Aggression >= 60 && Aggression < 80) 
 	{
 		SetState(EState::Investigate);
 	}
-	else if(Aggression >= 90) 
+	else if(Aggression >= 80) 
 	{
 		SetState(EState::Hunt);
-	}
-	if(CurrentState == EState::Hunt)
-	{
-		// Add specific Hunt logic here???
 	}
 }
 
@@ -57,44 +63,36 @@ void AMonster::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
-void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus)
+void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus) // If player has just ENTERED or EXITED the senses.
 {
-	if (AAdvancedHorrorAICharacter* Player = Cast<AAdvancedHorrorAICharacter>(Actor))
+	if (AAdvancedHorrorAICharacter* Player = Cast<AAdvancedHorrorAICharacter>(Actor)) // only works with sight atm
 	{
 		bCanSeePlayer = !bCanSeePlayer;
-		if(!bCanSeePlayer)
-		{
-			TimeAtLastSeenPlayer = GetWorld()->GetTime().GetRealTimeSeconds() + 5;
-		}
-		BlackboardComponent->SetValueAsVector("LastPlayerLocation", Player->GetActorLocation());
+		BlackboardComponent->SetValueAsBool("CanSeePlayer", bCanSeePlayer);
 	}
 }
 
-void AMonster::DecayAgression()
+bool AMonster::ShouldDecayAggression()
 {
-	if(TimeAtLastSeenPlayer <= GetWorld()->GetTime().GetRealTimeSeconds())
-	{
-		AddAggression(-100);
-	}
+	return TimeAtLastSeenPlayer <= GetWorld()->GetTime().GetRealTimeSeconds();
 }
 
 void AMonster::SetState(EState newState)
 {
 	CurrentState = newState;
 	BlackboardComponent->SetValueAsEnum("CurrentState", static_cast<uint8>(CurrentState));
-	float InvestigateStartTime = 0;
-	float HuntStartTime = 0;
 	switch (newState)
 	{
 	case EState::Idle:
+		GetCharacterMovement()->MaxWalkSpeed = 300; // temp
 		break;
 	case EState::Patrol:
 		break;
 	case EState::Investigate:
-		InvestigateStartTime = GetWorld()->GetTimeSeconds(); // fire logic here
+		GetCharacterMovement()->MaxWalkSpeed = 400; // temp
 		break;
 	case EState::Hunt:
-		HuntStartTime = GetWorld()->GetTimeSeconds(); // fire logic here
+		GetCharacterMovement()->MaxWalkSpeed = 600; // temp
 		break;
 	case EState::Leave:
 		break;

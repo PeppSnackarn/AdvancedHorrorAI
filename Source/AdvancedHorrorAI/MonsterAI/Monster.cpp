@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISense_Hearing.h"
 
 // Sets default values
 AMonster::AMonster()
@@ -31,11 +32,11 @@ void AMonster::Tick(float DeltaTime)
 	{
 		AddAggression(AggressionAddedPerSecond * DeltaTime);
 		BlackboardComponent->SetValueAsVector("LastPlayerLocation", GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation()); // Ugly solution to always have last player location available
-		TimeAtLastSeenPlayer = GetWorld()->GetTime().GetRealTimeSeconds() + AggressionDecayCooldown;
+		// since monster is having hard time tracking player, should find a way to make sure that the player is in sight of the monster or the director lets the monster cheat.
 	}
 	else
 	{
-		if(ShouldDecayAggression())
+		if(ShouldDecayAggression() && bDecayAgression)
 		{
 			AddAggression(-AggressionDecayPerSecond * DeltaTime);
 		}
@@ -55,7 +56,7 @@ void AMonster::HandleAggressionStates()
 	}
 	else if(Aggression >= 80) 
 	{
-		SetState(EState::Hunt);
+		SetState(EState::Hunt); // Make hunting state not be affected by amount of aggression rather if above 80 aggression and sees player, insta hunt.
 	}
 }
 
@@ -65,16 +66,29 @@ void AMonster::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 }
 void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus) // If player has just ENTERED or EXITED the senses.
 {
-	if (AAdvancedHorrorAICharacter* Player = Cast<AAdvancedHorrorAICharacter>(Actor)) // only works with sight atm
+	TSubclassOf<UAISense> Sense = UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), Stimulus);
+
+	if(Sense->IsChildOf<UAISense_Sight>())
 	{
-		bCanSeePlayer = !bCanSeePlayer;
-		BlackboardComponent->SetValueAsBool("CanSeePlayer", bCanSeePlayer);
+		if(AAdvancedHorrorAICharacter* Player = Cast<AAdvancedHorrorAICharacter>(Actor))
+		{
+			bCanSeePlayer = !bCanSeePlayer;
+			BlackboardComponent->SetValueAsBool("CanSeePlayer", bCanSeePlayer);
+			SetLastSenseSensed(ELastSensedSense::Sight);
+		}
 	}
+	if(Sense->IsChildOf<UAISense_Hearing>()) // make the aggression added scale with distance?
+	{
+		AddAggression(60); 
+		BlackboardComponent->SetValueAsVector("LastHeardLocation", Actor->GetActorLocation());
+		SetLastSenseSensed(ELastSensedSense::Hearing);
+	}
+	TimeAtLastSensedPlayer = GetWorld()->GetTime().GetRealTimeSeconds() + AggressionDecayCooldown;
 }
 
 bool AMonster::ShouldDecayAggression()
 {
-	return TimeAtLastSeenPlayer <= GetWorld()->GetTime().GetRealTimeSeconds();
+	return TimeAtLastSensedPlayer <= GetWorld()->GetTime().GetRealTimeSeconds();
 }
 
 void AMonster::SetState(EState newState)
@@ -95,6 +109,20 @@ void AMonster::SetState(EState newState)
 		GetCharacterMovement()->MaxWalkSpeed = 600; // temp
 		break;
 	case EState::Leave:
+		break;
+	}
+}
+void AMonster::SetLastSenseSensed(ELastSensedSense newSense)
+{
+	LastSensedSense = newSense;
+	BlackboardComponent->SetValueAsEnum("LastSenseSensed", static_cast<uint8>(LastSensedSense));
+	switch (newSense)
+	{
+	case ELastSensedSense::None:
+		break;
+	case ELastSensedSense::Sight:
+		break;
+	case ELastSensedSense::Hearing:
 		break;
 	}
 }

@@ -18,6 +18,13 @@ enum class EState : uint8
 	Hunt,
 	Leave
 };
+UENUM()
+enum class ELastSensedSense : uint8
+{
+	None,
+	Sight,
+	Hearing
+};
 UCLASS()
 class ADVANCEDHORRORAI_API AMonster : public ACharacter
 {
@@ -42,6 +49,8 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Monster Info")
 	EState CurrentState = EState::Idle;
+	UPROPERTY(VisibleAnywhere, Category = "Monster Info")
+	ELastSensedSense LastSensedSense = ELastSensedSense::None;
 	UPROPERTY(VisibleAnywhere, meta =(ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"), Category = "Monster Info")
 	float Aggression = 0;
 	UPROPERTY(EditDefaultsOnly, Category = "Monster Info")
@@ -52,14 +61,17 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Monster Config")
 	float AggressionAddedPerSecond = 90;
 	UPROPERTY(EditAnywhere, Category = "Monster Config")
+	bool bDecayAgression = true;
+	UPROPERTY(EditAnywhere, Category = "Monster Config")
 	float AggressionDecayPerSecond = 40;
 	UPROPERTY(EditAnywhere, Category = "Monster Config")
 	float AggressionDecayCooldown = 5;
 
-	float TimeAtLastSeenPlayer;
+	float TimeAtLastSensedPlayer;
 
 	public:
 	void SetState(EState newState);
+	void SetLastSenseSensed(ELastSensedSense newSense);
 	inline EState GetCurrentState() { return CurrentState; }
 	inline void AddAggression(float ValueToAdd) { Aggression += ValueToAdd; Aggression = FMath::Clamp(Aggression, 0, 100); }
 };

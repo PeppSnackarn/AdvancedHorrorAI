@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Monster.generated.h"
 
 class UAIPerceptionComponent;
@@ -38,7 +39,6 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	void HandleAggressionStates();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	UFUNCTION()
 	void HandleSenses(AActor* Actor,FAIStimulus Stimulus);
@@ -53,6 +53,8 @@ public:
 	ELastSensedSense LastSensedSense = ELastSensedSense::None;
 	UPROPERTY(VisibleAnywhere, meta =(ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"), Category = "Monster Info")
 	float Aggression = 0;
+	UPROPERTY(VisibleAnywhere ,Category = "Monster Info")
+	float CurrentMoveSpeed = 0;
 	UPROPERTY(EditDefaultsOnly, Category = "Monster Info")
 	UAIPerceptionComponent* PerceptionComponent = nullptr;
 	UPROPERTY(VisibleAnywhere ,Category = "Monster Info")
@@ -68,10 +70,10 @@ public:
 	float AggressionDecayCooldown = 5;
 
 	float TimeAtLastSensedPlayer;
-
+	float MonsterDefaultMoveSpeed;
+	
 	public:
 	void SetState(EState newState);
 	void SetLastSenseSensed(ELastSensedSense newSense);
-	inline EState GetCurrentState() { return CurrentState; }
-	inline void AddAggression(float ValueToAdd) { Aggression += ValueToAdd; Aggression = FMath::Clamp(Aggression, 0, 100); }
+	void AddAggression(float ValueToAdd);
 };

@@ -9,6 +9,7 @@
 
 class UAIPerceptionComponent;
 class UBlackboardComponent;
+class UAISenseConfig_Sight;
 
 UENUM()
 enum class EState : uint8
@@ -45,7 +46,8 @@ public:
 	bool ShouldDecayAggression();
 	
 	protected:
-	UBlackboardComponent* BlackboardComponent;
+	UBlackboardComponent* BlackboardComponent = nullptr;
+	UAISenseConfig_Sight* SightConfig = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "Monster Info")
 	EState CurrentState = EState::Idle;
@@ -71,7 +73,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Monster Config")
 	float MonsterHuntVisionCone = 80;
 
-	float TimeAtLastSensedPlayer;
+	float TimeWhenShouldStartDecayAggression;
 	float MonsterDefaultMoveSpeed;
 	float MonsterDefaultVisionCone;
 	

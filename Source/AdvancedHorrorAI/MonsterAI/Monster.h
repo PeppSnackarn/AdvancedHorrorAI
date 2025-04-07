@@ -68,9 +68,12 @@ public:
 	float AggressionDecayPerSecond = 40;
 	UPROPERTY(EditAnywhere, Category = "Monster Config")
 	float AggressionDecayCooldown = 5;
+	UPROPERTY(EditAnywhere, Category = "Monster Config")
+	float MonsterHuntVisionCone = 80;
 
 	float TimeAtLastSensedPlayer;
 	float MonsterDefaultMoveSpeed;
+	float MonsterDefaultVisionCone;
 	
 	public:
 	void SetState(EState newState);

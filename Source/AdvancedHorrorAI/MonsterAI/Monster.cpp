@@ -32,6 +32,13 @@ void AMonster::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CurrentMoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	/*UAISenseConfig_Sight* SightConfig = Cast<UAISenseConfig_Sight>(PerceptionComponent->GetSenseConfig(UAISense::GetSenseID(UAISense_Sight::StaticClass())));
+	if(SightConfig)
+	{
+		SightConfig->SightRadius = 50000; // IT WORKS!
+		SightConfig->PeripheralVisionAngleDegrees = 100;
+	}
+	*/
 	if(bCanSeePlayer)
 	{
 		AddAggression(AggressionAddedPerSecond * DeltaTime);
@@ -98,6 +105,7 @@ void AMonster::SetState(EState newState)
 {
 	CurrentState = newState;
 	BlackboardComponent->SetValueAsEnum("CurrentState", static_cast<uint8>(CurrentState));
+	UAISenseConfig_Sight* SightConfig = Cast<UAISenseConfig_Sight>(PerceptionComponent->GetSenseConfig(UAISense::GetSenseID(UAISense_Sight::StaticClass())));
 	switch (newState)
 	{
 	case EState::Idle:
@@ -107,6 +115,8 @@ void AMonster::SetState(EState newState)
 	case EState::Investigate:
 		break;
 	case EState::Hunt:
+		SightConfig->PeripheralVisionAngleDegrees = MonsterHuntVisionCone;
+		PerceptionComponent->RequestStimuliListenerUpdate(); //CORRECT WAY OF DOING IT
 		break;
 	case EState::Leave:
 		break;

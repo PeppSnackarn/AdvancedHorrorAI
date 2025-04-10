@@ -18,6 +18,7 @@ AMonster::AMonster()
 	PerceptionComponent->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &AMonster::HandleSenses);
 	GetCharacterMovement()->MaxWalkSpeed = 300;
 }
+
 void AMonster::BeginPlay()
 {
 	Super::BeginPlay();
@@ -30,6 +31,7 @@ void AMonster::BeginPlay()
 	MonsterDefaultMoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	MonsterDefaultVisionCone = SightConfig->PeripheralVisionAngleDegrees;
 }
+
 void AMonster::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -55,7 +57,7 @@ void AMonster::Tick(float DeltaTime)
 			AddAggression(-AggressionDecayPerSecond * DeltaTime);
 		}
 	}
-	if(Aggression < 60)
+	if(Aggression < 60 && TimeWhenShouldRestartIdle <= GetWorld()->GetTime().GetRealTimeSeconds() && CurrentState != EState::Idle)
 	{
 		SetState(EState::Idle);
 	}
@@ -65,6 +67,7 @@ void AMonster::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
+
 void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus) // If player has just ENTERED or EXITED the senses.
 {
 	TSubclassOf<UAISense> Sense = UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), Stimulus);
@@ -81,11 +84,16 @@ void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus) // If player has
 	if(Sense->IsChildOf<UAISense_Hearing>()) // make the aggression added scale with distance?
 	{
 		SetLastSenseSensed(ELastSensedSense::Hearing);
-		AddAggression(60); 
+		AddAggression(30); 
 		BlackboardComponent->SetValueAsVector("LastHeardLocation", Actor->GetActorLocation());
 		if(Aggression >= 60 && Aggression < 80)
 		{
 			SetState(EState::Investigate);
+		}
+		if(CurrentState == EState::Idle)
+		{
+			InterruptIdle();
+			TimeWhenShouldRestartIdle = GetWorld()->GetTime().GetRealTimeSeconds() + 3;
 		}
 	}
 	TimeWhenShouldStartDecayAggression = GetWorld()->GetTime().GetRealTimeSeconds() + AggressionDecayCooldown;
@@ -94,6 +102,11 @@ void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus) // If player has
 bool AMonster::ShouldDecayAggression()
 {
 	return TimeWhenShouldStartDecayAggression <= GetWorld()->GetTime().GetRealTimeSeconds();
+}
+
+void AMonster::InterruptIdle()
+{
+	SetState(EState::StopListen);
 }
 
 void AMonster::SetState(EState newState)
@@ -105,7 +118,7 @@ void AMonster::SetState(EState newState)
 	case EState::Idle:
 		SightConfig->PeripheralVisionAngleDegrees = MonsterDefaultVisionCone;
 		break;
-	case EState::Patrol:
+	case EState::StopListen:
 		break;
 	case EState::Investigate:
 		break;
@@ -117,6 +130,7 @@ void AMonster::SetState(EState newState)
 	}
 	PerceptionComponent->RequestStimuliListenerUpdate(); // Updates sense-configs
 }
+
 void AMonster::SetLastSenseSensed(ELastSensedSense newSense)
 {
 	LastSensedSense = newSense;

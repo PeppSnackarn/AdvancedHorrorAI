@@ -15,7 +15,7 @@ UENUM()
 enum class EState : uint8
 {
 	Idle,
-	Patrol,
+	StopListen,
 	Investigate,
 	Hunt,
 	Leave
@@ -44,6 +44,7 @@ public:
 	UFUNCTION()
 	void HandleSenses(AActor* Actor,FAIStimulus Stimulus);
 	bool ShouldDecayAggression();
+	void InterruptIdle();
 	
 	protected:
 	UBlackboardComponent* BlackboardComponent = nullptr;
@@ -74,6 +75,7 @@ public:
 	float MonsterHuntVisionCone = 80;
 
 	float TimeWhenShouldStartDecayAggression;
+	float TimeWhenShouldRestartIdle;
 	float MonsterDefaultMoveSpeed;
 	float MonsterDefaultVisionCone;
 	

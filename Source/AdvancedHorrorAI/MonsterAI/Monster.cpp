@@ -39,8 +39,16 @@ void AMonster::Tick(float DeltaTime)
 	if(bCanSeePlayer)
 	{
 		AddAggression(AggressionAddedPerSecond * DeltaTime);
-		BlackboardComponent->SetValueAsVector("LastPlayerLocation", GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation()); // Ugly solution to always have last player location available
+		APawn* Player = GetWorld()->GetFirstPlayerController()->GetPawn();
+
+		BlackboardComponent->SetValueAsVector("LastPlayerLocation", Player->GetActorLocation()); // Ugly solution to always have last player location available
 		// since monster is having hard time tracking player, should find a way to make sure that the player is in sight of the monster or the director lets the monster cheat.
+
+		FVector Velocity = Player->GetVelocity();
+		if(Velocity.IsNearlyZero())
+			Velocity = Player->GetActorForwardVector();
+		BlackboardComponent->SetValueAsRotator("LastPlayerRotation", Velocity.Rotation());
+		
 		if(Aggression >= 60 && Aggression < 80)
 		{
 			SetState(EState::Investigate);
@@ -84,7 +92,7 @@ void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus) // If player has
 	if(Sense->IsChildOf<UAISense_Hearing>()) // make the aggression added scale with distance?
 	{
 		SetLastSenseSensed(ELastSensedSense::Hearing);
-		AddAggression(30); 
+		AddAggression(30);
 		BlackboardComponent->SetValueAsVector("LastHeardLocation", Actor->GetActorLocation());
 		if(Aggression >= 60 && Aggression < 80)
 		{

@@ -63,6 +63,14 @@ public:
 	UPROPERTY(VisibleAnywhere ,Category = "Monster Info")
 	bool bCanSeePlayer = false;
 	
+	UPROPERTY(EditDefaultsOnly, Category = "Monster Neccesity")
+	TSubclassOf<AActor> FakeQueryActorClass = nullptr;
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Monster Neccesity")
+	AActor* FakeQueryActor = nullptr;
+	
+
+protected:
 	UPROPERTY(EditAnywhere, Category = "Monster Config")
 	float AggressionAddedPerSecond = 90;
 	UPROPERTY(EditAnywhere, Category = "Monster Config")

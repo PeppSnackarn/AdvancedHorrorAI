@@ -22,6 +22,11 @@ AMonster::AMonster()
 void AMonster::BeginPlay()
 {
 	Super::BeginPlay();
+	ensureAlwaysMsgf(FakeQueryActorClass, TEXT("FakeQueryActor not set; EQS will not function!")); // ensure that EQS will function
+	if(FakeQueryActorClass)
+	{
+		FakeQueryActor = GetWorld()->SpawnActor(FakeQueryActorClass);
+	}
 	if (GetController())
 		BlackboardComponent = Cast<AAIController>(GetController())->GetBlackboardComponent();
 	if (BlackboardComponent)

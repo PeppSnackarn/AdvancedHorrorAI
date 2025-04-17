@@ -82,7 +82,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Monster Config")
 	float MonsterHuntVisionCone = 80;
 	
-	float TimeWhenShouldRestartIdle;
 	float TimeAtLastSense;
 	float MonsterDefaultMoveSpeed;
 	float MonsterDefaultVisionCone;

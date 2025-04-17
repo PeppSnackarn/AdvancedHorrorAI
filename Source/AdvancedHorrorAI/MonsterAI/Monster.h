@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Monster.generated.h"
 
+class AMonsterDirector;
 class UAIPerceptionComponent;
 class UBlackboardComponent;
 class UAISenseConfig_Sight;
@@ -42,7 +43,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	UFUNCTION()
 	void HandleSenses(AActor* Actor,FAIStimulus Stimulus);
-	void InterruptIdle();
 	
 protected:
 	UBlackboardComponent* BlackboardComponent = nullptr;
@@ -85,6 +85,7 @@ protected:
 	float TimeAtLastSense;
 	float MonsterDefaultMoveSpeed;
 	float MonsterDefaultVisionCone;
+	AMonsterDirector* DirectorRef = nullptr;
 	
 public:
 	void SetState(EState newState);

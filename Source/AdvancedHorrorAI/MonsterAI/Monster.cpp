@@ -3,9 +3,11 @@
 
 #include "Monster.h"
 #include "AIController.h"
+#include "MonsterDirector.h"
 #include "AdvancedHorrorAI/AdvancedHorrorAICharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Hearing.h"
@@ -31,8 +33,8 @@ void AMonster::BeginPlay()
 		BlackboardComponent = Cast<AAIController>(GetController())->GetBlackboardComponent();
 	if (BlackboardComponent)
 		BlackboardComponent->SetValueAsEnum("CurrentState", static_cast<uint8>(CurrentState));
-
 	SightConfig = Cast<UAISenseConfig_Sight>(PerceptionComponent->GetSenseConfig(UAISense::GetSenseID(UAISense_Sight::StaticClass())));
+	DirectorRef = Cast<AMonsterDirector>(UGameplayStatics::GetActorOfClass(GetWorld(), AMonsterDirector::StaticClass()));
 	MonsterDefaultMoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	MonsterDefaultVisionCone = SightConfig->PeripheralVisionAngleDegrees;
 }
@@ -60,7 +62,7 @@ void AMonster::Tick(float DeltaTime)
 		}
 		else if(Aggression >= 80) 
 		{
-			SetState(EState::Hunt); // Make hunting state not be affected by amount of aggression rather if above 80 aggression and sees player, insta hunt.
+			SetState(EState::Hunt);
 		}
 	}
 	else
@@ -102,16 +104,10 @@ void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus) // If player has
 		}
 		if(CurrentState == EState::Idle)
 		{
-			InterruptIdle();
-			TimeWhenShouldRestartIdle = GetWorld()->GetTime().GetRealTimeSeconds() + StopListenDuration;
+			SetState(EState::StopListen);
 		}
 	}
 	TimeAtLastSense = GetWorld()->GetTime().GetRealTimeSeconds();
-}
-
-void AMonster::InterruptIdle()
-{
-	SetState(EState::StopListen);
 }
 
 void AMonster::SetState(EState newState)
@@ -129,6 +125,8 @@ void AMonster::SetState(EState newState)
 		break;
 	case EState::Hunt:
 		SightConfig->PeripheralVisionAngleDegrees = MonsterHuntVisionCone;
+		if(DirectorRef)
+			DirectorRef->bIsHunting = true;
 		break;
 	case EState::Leave:
 		break;

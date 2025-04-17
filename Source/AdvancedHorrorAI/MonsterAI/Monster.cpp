@@ -65,14 +65,11 @@ void AMonster::Tick(float DeltaTime)
 	}
 	else
 	{
-		if(ShouldDecayAggression() && bDecayAgression)
+		if(CurrentState == EState::Idle)
 		{
-			AddAggression(-AggressionDecayPerSecond * DeltaTime);
+			if(TimeAtLastSense + AggressionDecayCooldown <= GetWorld()->GetTime().GetRealTimeSeconds() && bDecayAgression)
+				AddAggression(-AggressionDecayPerSecond * DeltaTime);
 		}
-	}
-	if(Aggression < 60 && TimeWhenShouldRestartIdle <= GetWorld()->GetTime().GetRealTimeSeconds() && CurrentState != EState::Idle)
-	{
-		SetState(EState::Idle);
 	}
 }
 
@@ -106,15 +103,10 @@ void AMonster::HandleSenses(AActor* Actor,FAIStimulus Stimulus) // If player has
 		if(CurrentState == EState::Idle)
 		{
 			InterruptIdle();
-			TimeWhenShouldRestartIdle = GetWorld()->GetTime().GetRealTimeSeconds() + 3;
+			TimeWhenShouldRestartIdle = GetWorld()->GetTime().GetRealTimeSeconds() + StopListenDuration;
 		}
 	}
-	TimeWhenShouldStartDecayAggression = GetWorld()->GetTime().GetRealTimeSeconds() + AggressionDecayCooldown;
-}
-
-bool AMonster::ShouldDecayAggression()
-{
-	return TimeWhenShouldStartDecayAggression <= GetWorld()->GetTime().GetRealTimeSeconds();
+	TimeAtLastSense = GetWorld()->GetTime().GetRealTimeSeconds();
 }
 
 void AMonster::InterruptIdle()

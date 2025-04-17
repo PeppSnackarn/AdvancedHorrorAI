@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Monster.generated.h"
 
 class UAIPerceptionComponent;
@@ -43,10 +42,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	UFUNCTION()
 	void HandleSenses(AActor* Actor,FAIStimulus Stimulus);
-	bool ShouldDecayAggression();
 	void InterruptIdle();
 	
-	protected:
+protected:
 	UBlackboardComponent* BlackboardComponent = nullptr;
 	UAISenseConfig_Sight* SightConfig = nullptr;
 
@@ -66,7 +64,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Monster Neccesity")
 	TSubclassOf<AActor> FakeQueryActorClass = nullptr;
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Monster Neccesity")
+	UPROPERTY(BlueprintReadWrite, Category = "Monster Neccesity")
 	AActor* FakeQueryActor = nullptr;
 	
 
@@ -80,14 +78,16 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Monster Config")
 	float AggressionDecayCooldown = 5;
 	UPROPERTY(EditAnywhere, Category = "Monster Config")
+	float StopListenDuration = 3;
+	UPROPERTY(EditAnywhere, Category = "Monster Config")
 	float MonsterHuntVisionCone = 80;
-
-	float TimeWhenShouldStartDecayAggression;
+	
 	float TimeWhenShouldRestartIdle;
+	float TimeAtLastSense;
 	float MonsterDefaultMoveSpeed;
 	float MonsterDefaultVisionCone;
 	
-	public:
+public:
 	void SetState(EState newState);
 	void SetLastSenseSensed(ELastSensedSense newSense);
 	void AddAggression(float ValueToAdd);

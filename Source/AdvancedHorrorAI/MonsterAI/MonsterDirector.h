@@ -20,8 +20,9 @@ protected:
 	AAdvancedHorrorAICharacter* PlayerRef = nullptr;
 private:
 	float TimeAtLostSight = 0;
+	bool bHadSightLastFrame = false;
 public:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Director Values")
 	bool bIsHunting = false;
 protected:
 

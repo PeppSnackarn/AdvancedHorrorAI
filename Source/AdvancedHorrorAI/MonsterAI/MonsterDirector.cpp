@@ -41,10 +41,11 @@ bool AMonsterDirector::EstablishedSightline()
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionQueryParams;
 	ActorLineTraceSingle(HitResult, MonsterRef->GetActorLocation(), PlayerRef->GetActorLocation(), ECC_Visibility, CollisionQueryParams);
-	if(HitResult.GetActor() == PlayerRef)
+	bool bCanSeePlayer = HitResult.GetActor() == PlayerRef;
+	if(bHadSightLastFrame && !bCanSeePlayer)
 	{
-		return true;
+		TimeAtLostSight = GetWorld()->GetTime().GetRealTimeSeconds(); // doesnt work, gets rewritten every frame
 	}
-	TimeAtLostSight = GetWorld()->GetTime().GetRealTimeSeconds(); // doesnt work, gets rewritten every frame
-	return false;
+	bHadSightLastFrame = bCanSeePlayer;
+	return bCanSeePlayer;
 }

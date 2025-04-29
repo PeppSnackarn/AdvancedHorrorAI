@@ -27,9 +27,10 @@ void AMonsterDirector::Tick(float DeltaSeconds)
 	{
 		if(!EstablishedSightline())
 		{
-			if(TimeAtLostSight + 5 <= GetWorld()->GetTime().GetRealTimeSeconds())
+			if(TimeAtLostSight >= 0 && TimeAtLostSight + LostSightTime <= GetWorld()->GetTime().GetRealTimeSeconds())
 			{
 				MonsterRef->SetState(EState::Investigate);
+				UE_LOG(LogTemp, Log, TEXT("Set state to investigate."))
 				bIsHunting = false;
 			}
 		}
@@ -40,11 +41,11 @@ bool AMonsterDirector::EstablishedSightline()
 {
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionQueryParams;
-	ActorLineTraceSingle(HitResult, MonsterRef->GetActorLocation(), PlayerRef->GetActorLocation(), ECC_Visibility, CollisionQueryParams);
+	GetWorld()->LineTraceSingleByChannel(HitResult, MonsterRef->GetActorLocation(), PlayerRef->GetActorLocation(), ECC_Visibility, CollisionQueryParams);
 	bool bCanSeePlayer = HitResult.GetActor() == PlayerRef;
 	if(bHadSightLastFrame && !bCanSeePlayer)
 	{
-		TimeAtLostSight = GetWorld()->GetTime().GetRealTimeSeconds(); // doesnt work, gets rewritten every frame
+		TimeAtLostSight = GetWorld()->GetTime().GetRealTimeSeconds(); 
 	}
 	bHadSightLastFrame = bCanSeePlayer;
 	return bCanSeePlayer;

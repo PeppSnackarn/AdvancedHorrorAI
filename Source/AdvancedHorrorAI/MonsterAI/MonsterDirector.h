@@ -19,8 +19,12 @@ protected:
 	AMonster* MonsterRef = nullptr;
 	AAdvancedHorrorAICharacter* PlayerRef = nullptr;
 private:
-	float TimeAtLostSight = 0;
+	UPROPERTY(VisibleAnywhere)
+	float TimeAtLostSight = -1; // default number to ensure that AI can't "lose sight" on scene start
+	UPROPERTY(VisibleAnywhere)
 	bool bHadSightLastFrame = false;
+	UPROPERTY(EditAnywhere)
+	float LostSightTime = 3;
 public:
 	UPROPERTY(VisibleAnywhere, Category = "Director Values")
 	bool bIsHunting = false;

@@ -32,7 +32,10 @@ void AMonster::BeginPlay()
 	if (GetController())
 		BlackboardComponent = Cast<AAIController>(GetController())->GetBlackboardComponent();
 	if (BlackboardComponent)
+	{
 		BlackboardComponent->SetValueAsEnum("CurrentState", static_cast<uint8>(CurrentState));
+		BlackboardComponent->SetValueAsObject("PlayerRef", GetWorld()->GetFirstPlayerController());
+	}
 	SightConfig = Cast<UAISenseConfig_Sight>(PerceptionComponent->GetSenseConfig(UAISense::GetSenseID(UAISense_Sight::StaticClass())));
 	DirectorRef = Cast<AMonsterDirector>(UGameplayStatics::GetActorOfClass(GetWorld(), AMonsterDirector::StaticClass()));
 	MonsterDefaultMoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
